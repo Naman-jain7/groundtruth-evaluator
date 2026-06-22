@@ -5,14 +5,13 @@ Coordinates: output generation → aggregation → plotting → reporting
 
 import argparse
 import sys
-from pathlib import Path
 from typing import Optional
 
 # Import pipeline modules
 from generate_outputs import generate_outputs
 from aggregate_categories import aggregate_categories
 from generate_plots import generate_plots_and_reports
-
+from config import OUTPUT_DIR
 
 def run_full_pipeline(
     dataset_limit: Optional[int] = None,
@@ -32,9 +31,6 @@ def run_full_pipeline(
     print("TRUTHFUL_QA EVALUATION PIPELINE")
     print("=" * 80 + "\n")
 
-    output_dir = Path("outputs")
-    output_dir.mkdir(exist_ok=True)
-
     # Stage 1: Generate outputs
     if not skip_generation:
         print("\n[STAGE 1/3] GENERATING MODEL OUTPUTS")
@@ -43,13 +39,13 @@ def run_full_pipeline(
             results, csv_path = generate_outputs(
                 dataset_limit=dataset_limit,
                 sample_questions=sample_questions,
-            )
+            ) # type: ignore
             print(f"✅ Stage 1 complete: {csv_path}")
         except Exception as e:
             print(f"❌ Stage 1 failed: {e}")
             return False
     else:
-        csv_path = output_dir / "evaluation_results.csv"
+        csv_path = OUTPUT_DIR / "evaluation_results.csv"
         if not csv_path.exists():
             print(f"❌ CSV file not found: {csv_path}")
             return False
@@ -59,8 +55,8 @@ def run_full_pipeline(
     print("\n[STAGE 2/3] AGGREGATING BY CATEGORY")
     print("-" * 80)
     try:
-        agg_results = aggregate_categories(csv_path)
-        print(f"✅ Stage 2 complete")
+        agg_results = aggregate_categories(csv_path)  # noqa: F841
+        print("✅ Stage 2 complete")
     except Exception as e:
         print(f"❌ Stage 2 failed: {e}")
         return False
@@ -69,8 +65,8 @@ def run_full_pipeline(
     print("\n[STAGE 3/3] GENERATING PLOTS & REPORTS")
     print("-" * 80)
     try:
-        plots, report = generate_plots_and_reports()
-        print(f"✅ Stage 3 complete")
+        plots, report = generate_plots_and_reports() # type: ignore
+        print("✅ Stage 3 complete")
     except Exception as e:
         print(f"❌ Stage 3 failed: {e}")
         return False
@@ -81,10 +77,10 @@ def run_full_pipeline(
     print("=" * 80)
     print("\n📁 OUTPUT FILES:")
     print(f"  Evaluation Results:  {csv_path}")
-    print(f"  Category Aggregated: {output_dir / 'category_aggregated.csv'}")
-    print(f"  Summary Statistics:  {output_dir / 'category_summary_stats.json'}")
+    print(f"  Category Aggregated: {OUTPUT_DIR / 'category_aggregated.csv'}")
+    print(f"  Summary Statistics:  {OUTPUT_DIR / 'category_summary_stats.json'}")
     print(f"  Comparison Report:   {report}")
-    print(f"  Plots Directory:     {output_dir / 'plots'}/")
+    print(f"  Plots Directory:     {OUTPUT_DIR / 'plots'}/")
     print("\n" + "🎉 " * 40 + "\n")
 
     return True
@@ -134,7 +130,7 @@ def main():
         results, csv_path = generate_outputs(
             dataset_limit=args.limit,
             sample_questions=args.sample,
-        )
+        ) # type: ignore
         success = csv_path.exists()
     elif args.stage == "aggregate":
         print("\n[STAGE 2/3] AGGREGATING BY CATEGORY")

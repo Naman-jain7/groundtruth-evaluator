@@ -9,7 +9,7 @@ Visualizations include:
 
 import json
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Optional
 
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -37,9 +37,7 @@ COLORS = sns.color_palette("husl", 8)
 # ============================================================================
 
 
-def plot_hallucination_rate_by_category(
-    df: pd.DataFrame, output_path: Optional[Path] = None
-) -> Path:
+def plot_hallucination_rate_by_category(df: pd.DataFrame, output_path: Optional[Path] = None) -> Path:
     """
     Plot hallucination pass rate grouped by category and model.
     Higher rate = fewer hallucinations = better performance.
@@ -48,9 +46,7 @@ def plot_hallucination_rate_by_category(
 
     # Prepare data
     plot_data = df.copy()
-    plot_data = plot_data.sort_values(
-        ["category", "hallucination_pass_rate"], ascending=[True, False]
-    )
+    plot_data = plot_data.sort_values(["category", "hallucination_pass_rate"], ascending=[True, False])
 
     # Create grouped bar chart
     categories = plot_data["category"].unique()
@@ -156,30 +152,16 @@ def plot_model_comparison(df: pd.DataFrame, output_path: Optional[Path] = None) 
     return output_path
 
 
-def plot_heatmap_category_model(
-    df: pd.DataFrame,
-    metric: str = "hallucination_pass_rate",
-    output_path: Optional[Path] = None,
-) -> Path:
+def plot_heatmap_category_model(df: pd.DataFrame,metric: str = "hallucination_pass_rate",output_path: Optional[Path] = None) -> Path:
     """
     Create a heatmap showing metric values across categories and models.
     """
     # Pivot for heatmap
-    pivot_data = df.pivot_table(
-        values=metric, index="category", columns="model", aggfunc="mean"
-    )
+    pivot_data = df.pivot_table(values=metric, index="category", columns="model", aggfunc="mean")
 
     fig, ax = plt.subplots(figsize=(10, 8))
 
-    sns.heatmap(
-        pivot_data,
-        annot=True,
-        fmt=".1f",
-        cmap="RdYlGn",
-        cbar_kws={"label": f"{metric} (%)"},
-        ax=ax,
-        linewidths=0.5,
-    )
+    sns.heatmap(pivot_data,annot=True,fmt=".1f",cmap="RdYlGn",cbar_kws={"label": f"{metric} (%)"},ax=ax,linewidths=0.5)
 
     ax.set_title(
         f"{metric.replace('_', ' ').title()} Heatmap\n(Category × Model)",
@@ -201,16 +183,14 @@ def plot_heatmap_category_model(
     return output_path
 
 
-def plot_metric_distributions(
-    df: pd.DataFrame, output_path: Optional[Path] = None
-) -> Path:
+def plot_metric_distributions(df: pd.DataFrame, output_path: Optional[Path] = None) -> Path:
     """
     Plot distributions of metric scores (not pass/fail, but continuous scores).
     """
     score_metrics = [
-        ("hallucination_score", "Hallucination Score"),
-        ("answer_relevancy_score", "Answer Relevancy Score"),
-        ("faithfulness_score", "Faithfulness Score"),
+        ("hallucination_avg_score", "Hallucination Score"),
+        ("answer_relevancy_avg_score", "Answer Relevancy Score"),
+        ("faithfulness_avg_score", "Faithfulness Score"),
     ]
 
     fig, axes = plt.subplots(1, 3, figsize=(18, 5))
@@ -228,7 +208,7 @@ def plot_metric_distributions(
             continue
 
         # Create violin plot
-        parts = ax.violinplot(
+        parts = ax.violinplot(  # noqa: F841
             [
                 plot_df[plot_df["model"] == model][score_col].values
                 for model in sorted(models)
@@ -257,9 +237,7 @@ def plot_metric_distributions(
     return output_path
 
 
-def plot_sample_count_by_category(
-    df: pd.DataFrame, output_path: Optional[Path] = None
-) -> Path:
+def plot_sample_count_by_category(df: pd.DataFrame, output_path: Optional[Path] = None) -> Path:
     """
     Bar chart showing number of samples per category and model.
     """
@@ -308,9 +286,7 @@ def plot_sample_count_by_category(
 # ============================================================================
 
 
-def generate_comparison_report(
-    df: pd.DataFrame, summary_stats: dict, output_path: Optional[Path] = None
-) -> Path:
+def generate_comparison_report(df: pd.DataFrame, summary_stats: dict, output_path: Optional[Path] = None) -> Path:
     """
     Generate a comprehensive text-based model comparison report.
     """
@@ -439,7 +415,7 @@ def generate_plots_and_reports(
     if summary_stats_path.exists():
         with open(summary_stats_path) as f:
             summary_stats = json.load(f)
-        print(f"✅ Loaded summary statistics\n")
+        print("✅ Loaded summary statistics\n")
 
     # Generate plots
     print("Generating plots...\n")

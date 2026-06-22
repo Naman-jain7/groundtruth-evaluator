@@ -1,107 +1,67 @@
-import os
-import requests
-from pathlib import Path
 import time
-import json
 
+from ollama import Client
 
-OLLAMA_API_KEY = os.getenv("OLLAMA_API_KEY")
-OLLAMA_API_URL = os.getenv("OLLAMA_API_URL", "https://api.ollama.ai/v1")
-
-MODELS = [
-    os.getenv("MODEL_A", "mistral"),
-    os.getenv("MODEL_B", "neural-chat"),
-]
-
-OUTPUT_DIR = Path("outputs")
-OUTPUT_DIR.mkdir(exist_ok=True)
-
-# Batch settings
-BATCH_SIZE = 10
-TIMEOUT = 60  # seconds per request
+from config import OLLAMA_API_KEY
 
 
 class OllamaCloudClient:
     """Client for Ollama Cloud API with retry logic and error handling."""
 
-    def __init__(self, api_key: str, base_url: str = OLLAMA_API_URL):
-        if not api_key:
-            raise ValueError(
-                "OLLAMA_API_KEY not found in environment. ",
-                "Please set it in your .env file.",
-            )
-        self.api_key = api_key
-        self.base_url = base_url.rstrip("/")
-        self.headers = {
-            "Authorization": f"Bearer {api_key}",
-            "Content-Type": "application/json",
-        }
-        self.session = requests.Session()
-        self.session.headers.update(self.headers)
+    def __init__(self, api_key: str = None, api_url: str = None):  # type:ignore
+        self.api_key = api_key or OLLAMA_API_KEY
+        self.api_url = api_url or "https://ollama.com"
+        self.client = Client(
+            host=self.api_url,
+            headers={"Authorization": f"Bearer {self.api_key}"},
+        )
 
     def generate(
         self,
         model: str,
         prompt: str,
+        system_message: str = "Please provide a concise response (in 1-3 lines).",
         max_tokens: int = 512,
         temperature: float = 0.7,
-        retries: int = 3,
+        retries: int = 5,
     ) -> str:
+        """Generate a response using the Ollama Cloud API (same approach as trial())."""
 
-        endpoint = f"{self.base_url}/chat/completions"
+        messages = []
+        if system_message:
+            messages.append({"role": "system", "content": system_message})
+        messages.append({"role": "user", "content": prompt})
 
-        payload = {
-            "model": model,
-            "messages": [{"role": "user", "content": prompt}],
-            "max_tokens": max_tokens,
+        options = {
+            "num_predict": max_tokens,
             "temperature": temperature,
-            "stream": False,
         }
 
         for attempt in range(retries):
             try:
-                response = self.session.post(
-                    endpoint,
-                    json=payload,
-                    timeout=TIMEOUT,
-                )
-                response.raise_for_status()
+                # Use the ollama library client (same as trial()) with streaming
+                chunks = []
+                for chunk in self.client.chat(
+                    model=model,
+                    messages=messages,
+                    stream=True,
+                    options=options,
+                ):
+                    chunks.append(chunk['message']['content'])
 
-                result = response.json()
+                return "".join(chunks).strip()
 
-                # Extract message content
-                if "choices" in result and len(result["choices"]) > 0:
-                    return result["choices"][0]["message"]["content"].strip()
-
-                raise ValueError(f"Unexpected API response format: {result}")
-
-            except requests.exceptions.Timeout:
+            except Exception as e:
                 if attempt < retries - 1:
-                    wait_time = 2**attempt  # Exponential backoff
+                    wait_time = 3 ** attempt  # Exponential backoff: 1s, 3s, 9s, 27s
                     print(
-                        f"  Timeout on {model} (attempt {attempt + 1}/{retries}). ",
-                        f"Retrying in {wait_time}s...",
-                    )
-                    time.sleep(wait_time)
-                else:
-                    raise RuntimeError(
-                        f"API timeout after {retries} retries for model {model}"
-                    )
-
-            except requests.exceptions.RequestException as e:
-                if attempt < retries - 1:
-                    wait_time = 2**attempt
-                    print(
-                        f"  Request error on {model} (attempt {attempt + 1}/{retries}): ",
-                        f"{str(e)[:100]}. Retrying in {wait_time}s...",
+                        f"  Error on {model} (attempt {attempt + 1}/{retries}): "
+                        f"{str(e)[:100]}. Retrying in {wait_time}s..."
                     )
                     time.sleep(wait_time)
                 else:
                     raise RuntimeError(
                         f"API request failed after {retries} retries: {str(e)}"
                     )
-
-            except json.JSONDecodeError as e:
-                raise RuntimeError(f"Failed to parse API response: {str(e)}")
 
         raise RuntimeError(f"Exhausted all retries for model {model}")
