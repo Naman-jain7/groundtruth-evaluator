@@ -109,7 +109,7 @@ def test_api_connection():
 
     try:
         import requests
-        from generate_outputs import OllamaCloudClient
+        from ollama_client import OllamaCloudClient
 
         print("Initializing Ollama Cloud client...")
         client = OllamaCloudClient(os.getenv("OLLAMA_API_KEY"))
@@ -143,14 +143,10 @@ def test_datasets():
     print("=" * 80 + "\n")
 
     try:
-        from datasets import load_dataset
+        from datasets import load_from_disk
 
-        print("Loading TruthfulQA (generation split, 5 samples)...")
-        dataset = load_dataset(
-            "truthful_qa",
-            "generation",
-            trust_remote_code=True,
-        )
+        print("Loading TruthfulQA from disk...")
+        dataset = load_from_disk("data/truthful_qa")
 
         # Show first 3 items
         print(f"✅ Dataset loaded successfully")
@@ -181,41 +177,30 @@ def test_deepeval_metrics():
     print("=" * 80 + "\n")
 
     try:
-        from deepeval.metrics import (
-            HallucinationMetric,
-            AnswerRelevancyMetric,
-            FaithfulnessMetric,
-        )
-        from deepeval.test_case import LLMTestCase
+        from evaluator import DeepEvalEvaluator
 
-        print("Initializing metrics...")
-        h_metric = HallucinationMetric(threshold=0.5)
-        r_metric = AnswerRelevancyMetric(threshold=0.5)
-        f_metric = FaithfulnessMetric(threshold=0.5)
-        print("✅ Metrics initialized\n")
+        print("Initializing evaluator...")
+        evaluator = DeepEvalEvaluator()
+        print("✅ Evaluator initialized\n")
 
         print("Creating test case...")
-        test_case = LLMTestCase(
-            input="What is the capital of France?",
-            actual_output="Paris is the capital of France.",
-            context=["Paris is the capital of France"],
-        )
+        question = "What is the capital of France?"
+        answer = "Paris is the capital of France."
+        context = "Paris is the capital of France"
         print("✅ Test case created\n")
 
         print("Evaluating test case...")
-        h_metric.measure(test_case)
-        r_metric.measure(test_case)
-        f_metric.measure(test_case)
+        eval_results = evaluator.evaluate(question, answer, context)
 
         print(f"✅ Metrics evaluated successfully:")
         print(
-            f"   Hallucination Score:  {h_metric.score:.2f} (pass: {h_metric.is_successful()})"
+            f"   Hallucination Score:  {eval_results.get('hallucination_score')} (pass: {eval_results.get('hallucination_pass')})"
         )
         print(
-            f"   Relevancy Score:      {r_metric.score:.2f} (pass: {r_metric.is_successful()})"
+            f"   Relevancy Score:      {eval_results.get('answer_relevancy_score')} (pass: {eval_results.get('answer_relevancy_metric')})"
         )
         print(
-            f"   Faithfulness Score:   {f_metric.score:.2f} (pass: {f_metric.is_successful()})\n"
+            f"   Faithfulness Score:   {eval_results.get('faithfulness_score')} (pass: {eval_results.get('faithfulness_metric')})\n"
         )
 
         return True

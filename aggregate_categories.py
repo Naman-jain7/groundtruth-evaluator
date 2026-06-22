@@ -5,9 +5,21 @@ Calculates hallucination rate, answer relevancy, and faithfulness metrics per ca
 
 import json
 from pathlib import Path
-from typing import Dict, List
+from typing import Dict
 import pandas as pd
 import numpy as np
+
+
+class NumpyEncoder(json.JSONEncoder):
+    """JSON encoder that handles numpy types."""
+    def default(self, obj):
+        if isinstance(obj, (np.integer,)):
+            return int(obj)
+        if isinstance(obj, (np.floating,)):
+            return float(obj)
+        if isinstance(obj, np.ndarray):
+            return obj.tolist()
+        return super().default(obj)
 
 
 # ============================================================================
@@ -15,6 +27,7 @@ import numpy as np
 # ============================================================================
 
 OUTPUT_DIR = Path("outputs")
+
 METRICS = [
     "hallucination_metric",
     "answer_relevancy_metric",
@@ -186,14 +199,14 @@ def export_aggregated_results(
 
     json_path = output_dir / "category_aggregated.json"
     with open(json_path, "w") as f:
-        json.dump(aggregated_json, f, indent=2)
+        json.dump(aggregated_json, f, indent=2, cls=NumpyEncoder)
     print(f"✅ Saved JSON aggregation: {json_path}")
 
     # Summary statistics
     summary_stats = generate_summary_stats(combined_df)
     summary_path = output_dir / "category_summary_stats.json"
     with open(summary_path, "w") as f:
-        json.dump(summary_stats, f, indent=2)
+        json.dump(summary_stats, f, indent=2, cls=NumpyEncoder)
     print(f"✅ Saved summary statistics: {summary_path}\n")
 
     return combined_path, json_path, summary_path
@@ -227,12 +240,8 @@ def generate_summary_stats(df: pd.DataFrame) -> dict:
     return summary
 
 
-# ============================================================================
-# Main Pipeline
-# ============================================================================
 
-
-def aggregate_categories(csv_path: Path = None):
+def aggregate_categories(csv_path: Path = None): # type: ignore
     """Main aggregation pipeline."""
     print("\n" + "=" * 80)
     print("Category Aggregation Pipeline")

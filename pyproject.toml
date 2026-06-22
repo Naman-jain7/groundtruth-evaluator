@@ -17,6 +17,7 @@ dependencies = [
     "deepeval>=4.0.6",
     "tqdm>=4.68.3",
     "ollama>=0.6.2",
+    "seaborn>=0.13.2",
 ]
 
 [project.optional-dependencies]
