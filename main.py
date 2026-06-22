@@ -1,0 +1,154 @@
+"""
+Main Pipeline Orchestrator
+Coordinates: output generation → aggregation → plotting → reporting
+"""
+
+import argparse
+import sys
+from pathlib import Path
+from typing import Optional
+
+# Import pipeline modules
+from generate_outputs import generate_outputs
+from aggregate_categories import aggregate_categories
+from generate_plots import generate_plots_and_reports
+
+
+def run_full_pipeline(
+    dataset_limit: Optional[int] = None,
+    sample_questions: int = 0,
+    skip_generation: bool = False,
+):
+    """
+    Run the complete evaluation pipeline.
+
+    Args:
+        dataset_limit: Limit dataset size (for testing)
+        sample_questions: If > 0, only evaluate this many questions
+        skip_generation: Skip output generation, use existing CSV
+    """
+    print("\n" + "🚀 " * 40)
+    print("\n" + "=" * 80)
+    print("TRUTHFUL_QA EVALUATION PIPELINE")
+    print("=" * 80 + "\n")
+
+    output_dir = Path("outputs")
+    output_dir.mkdir(exist_ok=True)
+
+    # Stage 1: Generate outputs
+    if not skip_generation:
+        print("\n[STAGE 1/3] GENERATING MODEL OUTPUTS")
+        print("-" * 80)
+        try:
+            results, csv_path = generate_outputs(
+                dataset_limit=dataset_limit,
+                sample_questions=sample_questions,
+            )
+            print(f"✅ Stage 1 complete: {csv_path}")
+        except Exception as e:
+            print(f"❌ Stage 1 failed: {e}")
+            return False
+    else:
+        csv_path = output_dir / "evaluation_results.csv"
+        if not csv_path.exists():
+            print(f"❌ CSV file not found: {csv_path}")
+            return False
+        print(f"⏭️  Skipping generation, using existing: {csv_path}")
+
+    # Stage 2: Aggregate by category
+    print("\n[STAGE 2/3] AGGREGATING BY CATEGORY")
+    print("-" * 80)
+    try:
+        agg_results = aggregate_categories(csv_path)
+        print(f"✅ Stage 2 complete")
+    except Exception as e:
+        print(f"❌ Stage 2 failed: {e}")
+        return False
+
+    # Stage 3: Generate plots and reports
+    print("\n[STAGE 3/3] GENERATING PLOTS & REPORTS")
+    print("-" * 80)
+    try:
+        plots, report = generate_plots_and_reports()
+        print(f"✅ Stage 3 complete")
+    except Exception as e:
+        print(f"❌ Stage 3 failed: {e}")
+        return False
+
+    # Final summary
+    print("\n" + "=" * 80)
+    print("✅ PIPELINE COMPLETE!")
+    print("=" * 80)
+    print("\n📁 OUTPUT FILES:")
+    print(f"  Evaluation Results:  {csv_path}")
+    print(f"  Category Aggregated: {output_dir / 'category_aggregated.csv'}")
+    print(f"  Summary Statistics:  {output_dir / 'category_summary_stats.json'}")
+    print(f"  Comparison Report:   {report}")
+    print(f"  Plots Directory:     {output_dir / 'plots'}/")
+    print("\n" + "🎉 " * 40 + "\n")
+
+    return True
+
+
+def main():
+    parser = argparse.ArgumentParser(
+        description="TruthfulQA Evaluation Pipeline with DeepEval"
+    )
+    parser.add_argument(
+        "--sample",
+        type=int,
+        default=0,
+        help="Number of questions to evaluate (0 = all)",
+    )
+    parser.add_argument(
+        "--limit",
+        type=int,
+        default=None,
+        help="Limit dataset size (for testing)",
+    )
+    parser.add_argument(
+        "--skip-generation",
+        action="store_true",
+        help="Skip output generation, use existing CSV",
+    )
+    parser.add_argument(
+        "--stage",
+        type=str,
+        choices=["generate", "aggregate", "plot", "all"],
+        default="all",
+        help="Run specific stage or all stages",
+    )
+
+    args = parser.parse_args()
+
+    # Route to appropriate pipeline
+    if args.stage == "all":
+        success = run_full_pipeline(
+            dataset_limit=args.limit,
+            sample_questions=args.sample,
+            skip_generation=args.skip_generation,
+        )
+    elif args.stage == "generate":
+        print("\n[STAGE 1/3] GENERATING MODEL OUTPUTS")
+        print("-" * 80)
+        results, csv_path = generate_outputs(
+            dataset_limit=args.limit,
+            sample_questions=args.sample,
+        )
+        success = csv_path.exists()
+    elif args.stage == "aggregate":
+        print("\n[STAGE 2/3] AGGREGATING BY CATEGORY")
+        print("-" * 80)
+        aggregate_categories()
+        success = True
+    elif args.stage == "plot":
+        print("\n[STAGE 3/3] GENERATING PLOTS & REPORTS")
+        print("-" * 80)
+        generate_plots_and_reports()
+        success = True
+
+    return 0 if success else 1
+
+
+if __name__ == "__main__":
+    sys.exit(main())

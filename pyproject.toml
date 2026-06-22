@@ -1,0 +1,28 @@
+[project]
+name = "groundtruth_evaluator"
+version = "1.0.0"
+description = "A GenAI project with FastAPI"
+readme = "README.md"
+requires-python = ">=3.11"
+
+dependencies = [
+    "fastapi",
+    "uvicorn",
+    "python-dotenv",
+    "pydantic-settings",
+    "ipykernel>=7.3.0",
+    "datasets>=5.0.0",
+    "pandas>=3.0.3",
+    "matplotlib>=3.11.0",
+    "deepeval>=4.0.6",
+    "tqdm>=4.68.3",
+    "ollama>=0.6.2",
+]
+
+[project.optional-dependencies]
+dev = [
+    "ipykernel",
+]
+
+[tool.uv]
+package = false
