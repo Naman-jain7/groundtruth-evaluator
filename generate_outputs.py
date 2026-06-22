@@ -18,7 +18,7 @@ load_dotenv()
 # Main Pipeline
 # ============================================================================
 
-def generate_outputs(models: list = MODELS, dataset_limit: Optional[int] = None, sample_questions: int = 5):
+def generate_outputs(eval_model_name, models: list = MODELS, dataset_limit: Optional[int] = None, sample_questions: int = 5):
     """
     Main pipeline: Load data → Generate outputs → Evaluate → Save CSV.
     """
@@ -36,7 +36,7 @@ def generate_outputs(models: list = MODELS, dataset_limit: Optional[int] = None,
         print(f"❌ {e}")
         return
 
-    evaluator = DeepEvalEvaluator()
+    evaluator = DeepEvalEvaluator(eval_model_name)
     print("✅ DeepEval metrics initialized\n")
 
     # Load dataset

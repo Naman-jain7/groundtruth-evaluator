@@ -12,7 +12,7 @@ def load_truthful_qa(split: str = "generation", limit: Optional[int] = None):
     Returns:
         List of dictionaries with 'question', 'category', 'correct_answers'
     """
-    print(f"Loading TruthfulQA from disk...")
+    print("Loading TruthfulQA from disk...")
     try:
         dataset = load_from_disk("data/truthful_qa")
 

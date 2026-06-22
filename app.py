@@ -1,5 +1,3 @@
-import os
-from pathlib import Path
 
 import pandas as pd
 import streamlit as st
@@ -9,6 +7,7 @@ from aggregate_categories import aggregate_categories
 from generate_outputs import generate_outputs
 from generate_plots import generate_plots_and_reports
 from main import run_full_pipeline
+from config import OUTPUT_DIR
 
 load_dotenv()
 
@@ -41,9 +40,9 @@ stage = st.sidebar.selectbox(
 )
 
 # Update environment variables dynamically so that imported modules pick them up
-os.environ["MODEL_A"] = model_1
-os.environ["MODEL_B"] = model_2
-os.environ["EVAL_MODEL"] = eval_model
+# os.environ["MODEL_A"] = model_1
+# os.environ["MODEL_B"] = model_2
+# os.environ["EVAL_MODEL"] = eval_model
 
 # -----------------------------------------------------------------------------
 # Main Execution
@@ -62,6 +61,8 @@ if st.button("Run Evaluator", type="primary"):
     try:
         if stage == "all":
             success = run_full_pipeline(
+                eval_model_name=eval_model,
+                models=[model_1, model_2],
                 dataset_limit=actual_limit,
                 sample_questions=sample_questions,
                 skip_generation=skip_generation
@@ -73,6 +74,7 @@ if st.button("Run Evaluator", type="primary"):
                 
         elif stage == "generate":
             results, csv_path = generate_outputs(
+                eval_model_name=eval_model,
                 models=[model_1, model_2],
                 dataset_limit=actual_limit,
                 sample_questions=sample_questions
@@ -90,11 +92,14 @@ if st.button("Run Evaluator", type="primary"):
     except Exception as e:
         status_placeholder.error(f"An error occurred: {str(e)}")
 
+
+
+
+
 # Display Results if they exist
 st.markdown("### Latest Results")
 
-
-csv_path = Path("outputs/evaluation_results.csv")
+csv_path = OUTPUT_DIR / "evaluation_results.csv"
 if csv_path.exists():
     try:
         df = pd.read_csv(csv_path)

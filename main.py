@@ -4,6 +4,7 @@ Coordinates: output generation → aggregation → plotting → reporting
 """
 
 import argparse
+import os
 import sys
 from typing import Optional
 
@@ -11,9 +12,11 @@ from typing import Optional
 from generate_outputs import generate_outputs
 from aggregate_categories import aggregate_categories
 from generate_plots import generate_plots_and_reports
-from config import OUTPUT_DIR
+from config import OUTPUT_DIR, MODELS
 
 def run_full_pipeline(
+    eval_model_name: str,
+    models: list,
     dataset_limit: Optional[int] = None,
     sample_questions: int = 0,
     skip_generation: bool = False,
@@ -37,6 +40,8 @@ def run_full_pipeline(
         print("-" * 80)
         try:
             results, csv_path = generate_outputs(
+                eval_model_name=eval_model_name,
+                models=models,
                 dataset_limit=dataset_limit,
                 sample_questions=sample_questions,
             ) # type: ignore
@@ -117,9 +122,14 @@ def main():
 
     args = parser.parse_args()
 
+    # Use env vars for CLI defaults if not provided by app
+    eval_model_cli = os.getenv("EVAL_MODEL", "mistral")
+    
     # Route to appropriate pipeline
     if args.stage == "all":
         success = run_full_pipeline(
+            eval_model_name=eval_model_cli,
+            models=MODELS,
             dataset_limit=args.limit,
             sample_questions=args.sample,
             skip_generation=args.skip_generation,
@@ -128,6 +138,8 @@ def main():
         print("\n[STAGE 1/3] GENERATING MODEL OUTPUTS")
         print("-" * 80)
         results, csv_path = generate_outputs(
+            eval_model_name=eval_model_cli,
+            models=MODELS,
             dataset_limit=args.limit,
             sample_questions=args.sample,
         ) # type: ignore

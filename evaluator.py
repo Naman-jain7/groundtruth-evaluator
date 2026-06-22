@@ -39,9 +39,9 @@ class DeepEvalOllamaModel(DeepEvalBaseLLM):
 class DeepEvalEvaluator:
     """Wrapper for DeepEval metrics with error handling."""
 
-    def __init__(self):
+    def __init__(self, eval_model_name):
         api_key = os.getenv("OLLAMA_API_KEY")
-        eval_model_name = os.getenv("EVAL_MODEL") or "mistral"
+        eval_model_name = eval_model_name
         
         if api_key:
             self.model = DeepEvalOllamaModel(

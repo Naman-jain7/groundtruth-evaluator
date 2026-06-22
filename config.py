@@ -10,3 +10,4 @@ MODELS = [
 
 OUTPUT_DIR = Path("outputs")
 OUTPUT_DIR.mkdir(exist_ok=True)
+
