@@ -48,3 +48,9 @@ MISCONCEPTIONS
 ================================================================================
 SUMMARY & RECOMMENDATIONS
 ================================================================================
+
+✅ Best performing model (overall hallucination): gemma3:4b
+⚠️  Weakest category (overall hallucination): Misconceptions
+
+Note: All metrics are pass rates (higher = better).
+Hallucination metric: % of responses that pass (no hallucinations)

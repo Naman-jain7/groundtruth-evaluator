@@ -293,7 +293,7 @@ def generate_comparison_report(df: pd.DataFrame, summary_stats: dict, output_pat
     if output_path is None:
         output_path = OUTPUT_DIR / "model_comparison_report.txt"
 
-    with open(output_path, "w") as f:
+    with open(output_path, "w", encoding="utf-8") as f:
         f.write("=" * 80 + "\n")
         f.write("MODEL COMPARISON REPORT\n")
         f.write("TruthfulQA Evaluation using DeepEval Metrics\n")
