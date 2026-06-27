@@ -112,7 +112,7 @@ def test_api_connection():
         from ollama_client import OllamaCloudClient
 
         print("Initializing Ollama Cloud client...")
-        client = OllamaCloudClient(os.getenv("OLLAMA_API_KEY"))
+        client = OllamaCloudClient()
         print("✅ Client initialized\n")
 
         # Test simple generation

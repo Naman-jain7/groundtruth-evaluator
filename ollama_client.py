@@ -2,15 +2,15 @@ import time
 
 from ollama import Client
 
-from config import OLLAMA_API_KEY
+from config import OLLAMA_API_KEY, OLLAMA_API_URL
 
 
 class OllamaCloudClient:
     """Client for Ollama Cloud API with retry logic and error handling."""
 
-    def __init__(self, api_key: str = None, api_url: str = None):  # type:ignore
-        self.api_key = api_key or OLLAMA_API_KEY
-        self.api_url = api_url or "https://ollama.com"
+    def __init__(self):  # type:ignore
+        self.api_key = OLLAMA_API_KEY
+        self.api_url = OLLAMA_API_URL
         self.client = Client(
             host=self.api_url,
             headers={"Authorization": f"Bearer {self.api_key}"},

@@ -3,18 +3,18 @@ import pandas as pd
 import streamlit as st
 from dotenv import load_dotenv
 
-from aggregate_categories import aggregate_categories
-from generate_outputs import generate_outputs
-from generate_plots import generate_plots_and_reports
-from main import run_full_pipeline
-from config import OUTPUT_DIR
-
 load_dotenv()
+
+from aggregate_categories import aggregate_categories  # noqa: E402
+from config import OUTPUT_DIR  # noqa: E402
+from generate_outputs import generate_outputs  # noqa: E402
+from generate_plots import generate_plots_and_reports  # noqa: E402
+from main import run_full_pipeline  # noqa: E402
 
 st.set_page_config(page_title="Ground Truth Evaluator", layout="wide")
 st.title("Ground Truth Evaluator Dashboard")
 
-AVAILABLE_MODELS = {"gemini-3-flash-preview:cloud", "gemma4:31b", "gpt-oss:20b"}
+AVAILABLE_MODELS = {"gemma3:4b", "gemma4:31b", "gpt-oss:120b"}
 
 available_models = sorted(list(AVAILABLE_MODELS))
 
@@ -25,8 +25,8 @@ st.sidebar.header("Configuration")
 
 st.sidebar.subheader("Model Selection")
 model_1 = st.sidebar.selectbox("Model 1", options=available_models, index=0)
-model_2 = st.sidebar.selectbox("Model 2", options=available_models, index=min(1, len(available_models)-1))
-eval_model = st.sidebar.selectbox("Evaluation Judge Model", options=available_models, index=0)
+model_2 = st.sidebar.selectbox("Model 2", options=available_models, index=1)
+eval_model = st.sidebar.selectbox("Evaluation Judge Model", options=available_models, index=2)
 
 st.sidebar.subheader("Pipeline Options")
 sample_questions = st.sidebar.number_input("Sample Questions (0 = all)", min_value=0, value=5, step=1)
@@ -38,11 +38,6 @@ stage = st.sidebar.selectbox(
     options=["all", "generate", "aggregate", "plot"],
     index=0
 )
-
-# Update environment variables dynamically so that imported modules pick them up
-# os.environ["MODEL_A"] = model_1
-# os.environ["MODEL_B"] = model_2
-# os.environ["EVAL_MODEL"] = eval_model
 
 # -----------------------------------------------------------------------------
 # Main Execution

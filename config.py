@@ -2,6 +2,7 @@ import os
 from pathlib import Path
 
 OLLAMA_API_KEY = os.getenv("OLLAMA_API_KEY")
+OLLAMA_API_URL = os.getenv("OLLAMA_API_URL")
 
 MODELS = [
     os.getenv("MODEL_A", "mistral"),

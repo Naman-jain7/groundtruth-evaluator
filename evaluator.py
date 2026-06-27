@@ -17,7 +17,7 @@ class DeepEvalOllamaModel(DeepEvalBaseLLM):
     """Custom LLM wrapper for DeepEval using Ollama Cloud Client."""
     def __init__(self, model_name: str, api_key: str):
         self.model_name = model_name
-        self.client = OllamaCloudClient(api_key)
+        self.client = OllamaCloudClient()
 
     def load_model(self):
         return self.client

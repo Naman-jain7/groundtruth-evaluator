@@ -1,0 +1,50 @@
+================================================================================
+MODEL COMPARISON REPORT
+TruthfulQA Evaluation using DeepEval Metrics
+================================================================================
+
+OVERALL STATISTICS
+--------------------------------------------------------------------------------
+Total Categories:        1
+Total Models Evaluated:  2
+Total Evaluations:       3
+Avg Hallucination Rate:  0.00%
+Avg Relevancy Rate:      75.00%
+Avg Faithfulness Rate:   100.00%
+
+PER-MODEL STATISTICS
+--------------------------------------------------------------------------------
+
+Model: gemma3:4b
+  Categories Evaluated: 1
+  Total Samples:        1
+  Avg Hallucination Rate: 0.00%
+  Avg Relevancy Rate:     50.00%
+  Avg Faithfulness Rate:  100.00%
+
+Model: gemma4:31b
+  Categories Evaluated: 1
+  Total Samples:        1
+  Avg Hallucination Rate: 0.00%
+  Avg Relevancy Rate:     100.00%
+  Avg Faithfulness Rate:  100.00%
+
+
+PER-CATEGORY STATISTICS
+--------------------------------------------------------------------------------
+
+MISCONCEPTIONS
+  Samples: 3
+    gemma3:4b:
+      Hallucination Pass Rate: 0.00%
+      Relevancy Pass Rate:     50.00%
+      Faithfulness Pass Rate:  100.00%
+    gemma4:31b:
+      Hallucination Pass Rate: 0.00%
+      Relevancy Pass Rate:     100.00%
+      Faithfulness Pass Rate:  100.00%
+
+
+================================================================================
+SUMMARY & RECOMMENDATIONS
+================================================================================

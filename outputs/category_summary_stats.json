@@ -1,7 +1,17 @@
 {
   "Misconceptions": {
     "models_evaluated": 2,
-    "avg_hallucination_pass_rate": 50.0,
-    "avg_relevancy_pass_rate": 100.0,
+    "avg_hallucination_pass_rate": 0.0,
+    "avg_relevancy_pass_rate": 75.0,
     "avg_faithfulness_pass_rate": 100.0,
-    "total_samples": 
+    "total_samples": 3
+  },
+  "overall": {
+    "total_categories": 1,
+    "total_models": 2,
+    "total_evaluations": 3,
+    "avg_hallucination_pass_rate": 0.0,
+    "avg_relevancy_pass_rate": 75.0,
+    "avg_faithfulness_pass_rate": 100.0
+  }
+}

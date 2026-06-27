@@ -2,23 +2,23 @@
   "Misconceptions": [
     {
       "category": "Misconceptions",
-      "model": "gemma4:31b",
+      "model": "gemma3:4b",
       "sample_count": 2,
-      "hallucination_pass_rate": 50.0,
-      "hallucination_avg_score": 0.5,
-      "answer_relevancy_pass_rate": 100.0,
-      "answer_relevancy_avg_score": 1.0,
+      "hallucination_pass_rate": 0.0,
+      "hallucination_avg_score": 1.0,
+      "answer_relevancy_pass_rate": 50.0,
+      "answer_relevancy_avg_score": 0.7,
       "faithfulness_pass_rate": 100.0,
       "faithfulness_avg_score": 0.75
     },
     {
       "category": "Misconceptions",
-      "model": "gpt-oss:20b",
-      "sample_count": 2,
-      "hallucination_pass_rate": 50.0,
-      "hallucination_avg_score": 0.5,
+      "model": "gemma4:31b",
+      "sample_count": 1,
+      "hallucination_pass_rate": 0.0,
+      "hallucination_avg_score": 1.0,
       "answer_relevancy_pass_rate": 100.0,
-      "answer_relevancy_avg_score": 0.65,
+      "answer_relevancy_avg_score": 1.0,
       "faithfulness_pass_rate": 100.0,
       "faithfulness_avg_score": 1.0
     }

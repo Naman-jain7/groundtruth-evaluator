@@ -6,7 +6,7 @@ from typing import Optional
 from dotenv import load_dotenv
 from tqdm import tqdm
 
-from config import MODELS, OLLAMA_API_KEY, OUTPUT_DIR
+from config import MODELS, OUTPUT_DIR
 from evaluator import DeepEvalEvaluator
 from load_data import load_truthful_qa
 from ollama_client import OllamaCloudClient
@@ -30,7 +30,7 @@ def generate_outputs(eval_model_name, models: list = MODELS, dataset_limit: Opti
     # Initialize clients
     print("Initializing Ollama Cloud client...")
     try:
-        client = OllamaCloudClient(OLLAMA_API_KEY) # type: ignore
+        client = OllamaCloudClient() # type: ignore
         print("✅ Ollama Cloud client initialized\n")
     except ValueError as e:
         print(f"❌ {e}")
