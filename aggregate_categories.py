@@ -248,7 +248,7 @@ def aggregate_categories(csv_path: Path = None): # type: ignore
     print("=" * 80 + "\n")
 
     if csv_path is None:
-        csv_path = OUTPUT_DIR / "evaluation_results.csv"
+        csv_path = OUTPUT_DIR / "evaluated_results.csv"
 
     if not csv_path.exists():
         print(f"❌ CSV file not found: {csv_path}")
