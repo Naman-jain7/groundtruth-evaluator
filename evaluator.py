@@ -1,4 +1,5 @@
-import os
+import asyncio
+from typing import Any
 
 from deepeval.metrics import (
     AnswerRelevancyMetric,
@@ -9,15 +10,17 @@ from deepeval.models import DeepEvalBaseLLM
 from deepeval.test_case import LLMTestCase
 from dotenv import load_dotenv
 
-from ollama_client import OllamaCloudClient
+from config import OPENROUTER_API_KEY_1, OPENROUTER_API_KEY_2, OPENROUTER_API_KEY_3
+from ollama_client import OpenRouterCloudClient
 
 load_dotenv()
 
-class DeepEvalOllamaModel(DeepEvalBaseLLM):
-    """Custom LLM wrapper for DeepEval using Ollama Cloud Client."""
+class DeepEvalOpenRouterModel(DeepEvalBaseLLM):
+    """Custom LLM wrapper for DeepEval using OpenRouter Cloud Client."""
+
     def __init__(self, model_name: str, api_key: str):
         self.model_name = model_name
-        self.client = OllamaCloudClient()
+        self.client = OpenRouterCloudClient(api_key=api_key)
 
     def load_model(self):
         return self.client
@@ -25,35 +28,130 @@ class DeepEvalOllamaModel(DeepEvalBaseLLM):
     def get_model_name(self) -> str:
         return self.model_name
 
-    def generate(self, prompt: str) -> str:
-        # Prepend a system message to instruct the judge model to be concise and accurate
+    def generate(self, prompt: str, schema: type[Any] | None = None) -> Any:
         return self.client.generate(
             model=self.model_name,
             prompt=prompt,
-            system_message="You are an evaluation judge. Return your evaluation strictly in the requested format."
+            system_message="Return only valid JSON. No markdown.",
+            schema=schema,
         )
 
-    async def a_generate(self, prompt: str) -> str:
-        return self.generate(prompt)
+    async def a_generate(
+        self,
+        prompt: str,
+        schema: type[Any] | None = None,
+    ) -> Any:
+        return await self.client.a_generate(
+            model=self.model_name,
+            prompt=prompt,
+            system_message="Return only valid JSON. No markdown.",
+            schema=schema,
+        )
 
 class DeepEvalEvaluator:
     """Wrapper for DeepEval metrics with error handling."""
 
     def __init__(self, eval_model_name):
-        api_key = os.getenv("OLLAMA_API_KEY")
-        eval_model_name = eval_model_name
-        
-        if api_key:
-            self.model = DeepEvalOllamaModel(
-                model_name=eval_model_name,
-                api_key=api_key,
+        if not OPENROUTER_API_KEY_1 or not OPENROUTER_API_KEY_2 or not OPENROUTER_API_KEY_3:
+            raise ValueError(
+                "OLLAMA_API_KEY_1, OLLAMA_API_KEY_2, and OLLAMA_API_KEY_3 "
+                "are required for async metric evaluation."
             )
-        else:
-            self.model = None
 
-        self.hallucination_metric = HallucinationMetric(threshold=0.5, model=self.model)
-        self.relevancy_metric = AnswerRelevancyMetric(threshold=0.5, model=self.model)
-        self.faithfulness_metric = FaithfulnessMetric(threshold=0.5, model=self.model)
+        self.model_1 = DeepEvalOpenRouterModel(
+            model_name=eval_model_name,
+            api_key=OPENROUTER_API_KEY_1,
+        )
+        self.model_2 = DeepEvalOpenRouterModel(
+            model_name=eval_model_name,
+            api_key=OPENROUTER_API_KEY_2,
+        )
+        self.model_3 = DeepEvalOpenRouterModel(
+            model_name=eval_model_name,
+            api_key=OPENROUTER_API_KEY_3,
+        )
+
+        self.hallucination_metric = HallucinationMetric(
+            threshold=0.5,
+            model=self.model_1,
+        )
+        self.relevancy_metric = AnswerRelevancyMetric(
+            threshold=0.5,
+            model=self.model_2,
+        )
+        self.faithfulness_metric = FaithfulnessMetric(
+            threshold=0.5,
+            model=self.model_3,
+        )
+
+    def _measure_metric(
+        self,
+        metric,
+        test_case: LLMTestCase,
+        score_key: str,
+        pass_key: str,
+        label: str,
+    ) -> dict:
+        try:
+            metric.measure(test_case)
+            return {
+                score_key: metric.score,
+                pass_key: metric.is_successful(),
+            }
+        except Exception as e:
+            print(f"    ⚠️  {label} metric error: {str(e)[:80]}")
+            return {
+                score_key: None,
+                pass_key: None,
+            }
+
+    async def evaluate_async(self, question: str, answer: str, context: str) -> dict:
+        """Evaluate all metrics sequentially using OpenRouter."""
+
+        test_case = LLMTestCase(
+            input=question,
+            actual_output=answer,
+            context=[context],
+            retrieval_context=[context],
+        )
+
+        results = {}
+        
+        # Run sequentially to avoid rate limits
+        results.update(
+            await asyncio.to_thread(
+                self._measure_metric,
+                self.hallucination_metric,
+                test_case,
+                "hallucination_score",
+                "hallucination_pass",
+                "Hallucination",
+            )
+        )
+        
+        results.update(
+            await asyncio.to_thread(
+                self._measure_metric,
+                self.relevancy_metric,
+                test_case,
+                "relevancy_score",
+                "relevancy_pass",
+                "Relevancy",
+            )
+        )
+        
+        results.update(
+            await asyncio.to_thread(
+                self._measure_metric,
+                self.faithfulness_metric,
+                test_case,
+                "faithfulness_score",
+                "faithfulness_pass",
+                "Faithfulness",
+            )
+        )
+
+        return results
 
     def evaluate(self, question: str, answer: str, context: str) -> dict:
         """
@@ -68,50 +166,7 @@ class DeepEvalEvaluator:
             Dictionary with metric scores and pass/fail status
         """
         try:
-            # Create test case for evaluation
-            test_case = LLMTestCase(
-                input=question,
-                actual_output=answer,
-                context=[context],  # Ground truth as context
-                retrieval_context=[context],  # Required by FaithfulnessMetric
-            )
-
-            # Evaluate with each metric
-            results = {}
-
-            # Hallucination metric
-            try:
-                self.hallucination_metric.measure(test_case)
-                results["hallucination_score"] = self.hallucination_metric.score
-                results["hallucination_pass"] = (
-                    self.hallucination_metric.is_successful()
-                )
-            except Exception as e:
-                print(f"    ⚠️  Hallucination metric error: {str(e)[:80]}")
-                results["hallucination_score"] = None
-                results["hallucination_pass"] = None
-
-            # Answer relevancy metric
-            try:
-                self.relevancy_metric.measure(test_case)
-                results["relevancy_score"] = self.relevancy_metric.score
-                results["relevancy_pass"] = self.relevancy_metric.is_successful()
-            except Exception as e:
-                print(f"    ⚠️  Relevancy metric error: {str(e)[:80]}")
-                results["relevancy_score"] = None
-                results["relevancy_pass"] = None
-
-            # Faithfulness metric
-            try:
-                self.faithfulness_metric.measure(test_case)
-                results["faithfulness_score"] = self.faithfulness_metric.score
-                results["faithfulness_pass"] = self.faithfulness_metric.is_successful()
-            except Exception as e:
-                print(f"    ⚠️  Faithfulness metric error: {str(e)[:80]}")
-                results["faithfulness_score"] = None
-                results["faithfulness_pass"] = None
-
-            return results
+            return asyncio.run(self.evaluate_async(question, answer, context))
 
         except Exception as e:
             print(f"    ❌ Evaluation failed: {str(e)[:80]}")

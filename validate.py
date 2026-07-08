@@ -34,9 +34,9 @@ def test_environment():
     print("✓ Checking .env configuration...")
     env_path = Path(".env")
     if not env_path.exists():
-        print(f"  ❌ .env file not found. Create with: cp .env.example .env\n")
+        print("  ❌ .env file not found. Create with: cp .env.example .env\n")
         return False
-    print(f"  ✅ .env file found\n")
+    print("  ✅ .env file found\n")
 
     # Load environment
     load_dotenv()
@@ -45,7 +45,7 @@ def test_environment():
     print("✓ Checking Ollama API key...")
     api_key = os.getenv("OLLAMA_API_KEY")
     if not api_key or api_key == "your_api_key_here":
-        print(f"  ❌ OLLAMA_API_KEY not set or is placeholder\n")
+        print("  ❌ OLLAMA_API_KEY not set or is placeholder\n")
         return False
     print(f"  ✅ API key configured (length: {len(api_key)})\n")
 
@@ -93,7 +93,7 @@ def test_dependencies():
 
     if not all_ok:
         print(
-            f"\n⚠️  Install missing packages with: uv pip install -r requirements.txt\n"
+            "\n⚠️  Install missing packages with: uv pip install -r requirements.txt\n"
         )
         return False
 
@@ -108,7 +108,6 @@ def test_api_connection():
     print("=" * 80 + "\n")
 
     try:
-        import requests
         from ollama_client import OllamaCloudClient
 
         print("Initializing Ollama Cloud client...")
@@ -124,10 +123,9 @@ def test_api_connection():
             model=model,
             prompt="What is 2+2?",
             max_tokens=50,
-            retries=2,
         )
 
-        print(f"✅ API Response received:")
+        print("✅ API Response received:")
         print(f"   {response}\n")
         return True
 
@@ -149,7 +147,7 @@ def test_datasets():
         dataset = load_from_disk("data/truthful_qa")
 
         # Show first 3 items
-        print(f"✅ Dataset loaded successfully")
+        print("✅ Dataset loaded successfully")
         print(f"   Total samples: {len(dataset)}\n")
 
         print("Sample structure (first item):")
@@ -192,7 +190,7 @@ def test_deepeval_metrics():
         print("Evaluating test case...")
         eval_results = evaluator.evaluate(question, answer, context)
 
-        print(f"✅ Metrics evaluated successfully:")
+        print("✅ Metrics evaluated successfully:")
         print(
             f"   Hallucination Score:  {eval_results.get('hallucination_score')} (pass: {eval_results.get('hallucination_pass')})"
         )
@@ -225,7 +223,7 @@ def test_output_directory():
         test_file = output_dir / ".write_test"
         test_file.write_text("test")
         test_file.unlink()
-        print(f"✅ Output directory is writable\n")
+        print("✅ Output directory is writable\n")
 
         return True
 
