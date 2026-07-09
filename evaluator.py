@@ -11,7 +11,7 @@ from deepeval.test_case import LLMTestCase
 from dotenv import load_dotenv
 
 from config import OPENROUTER_API_KEY_1, OPENROUTER_API_KEY_2, OPENROUTER_API_KEY_3
-from ollama_client import OpenRouterCloudClient
+from ollama_client import OpenRouterCloudClient, OllamaCloudClient
 
 load_dotenv()
 
@@ -48,28 +48,67 @@ class DeepEvalOpenRouterModel(DeepEvalBaseLLM):
             schema=schema,
         )
 
+class DeepEvalOllamaLocalModel(DeepEvalBaseLLM):
+    """Custom LLM wrapper for DeepEval using Ollama's OpenAI compatibility layer (localhost) via Langchain for 100% reliable JSON schema enforcement."""
+
+    def __init__(self, model_name: str, host: str = "http://localhost:11434"):
+        self.model_name = model_name
+        # Point the Langchain/OpenAI wrapper to Ollama's local v1 endpoint
+        api_url = f"{host.rstrip('/')}/v1"
+        self.client = OpenRouterCloudClient(api_key="ollama", api_url=api_url)
+
+    def load_model(self):
+        return self.client
+
+    def get_model_name(self) -> str:
+        return self.model_name
+
+    def generate(self, prompt: str, schema: type[Any] | None = None) -> Any:
+        return self.client.generate(
+            model=self.model_name,
+            prompt=prompt,
+            system_message="Return only valid JSON. No markdown.",
+            schema=schema,
+        )
+
+    async def a_generate(
+        self,
+        prompt: str,
+        schema: type[Any] | None = None,
+    ) -> Any:
+        return await self.client.a_generate(
+            model=self.model_name,
+            prompt=prompt,
+            system_message="Return only valid JSON. No markdown.",
+            schema=schema,
+        )
+
 class DeepEvalEvaluator:
     """Wrapper for DeepEval metrics with error handling."""
 
     def __init__(self, eval_model_name):
-        if not OPENROUTER_API_KEY_1 or not OPENROUTER_API_KEY_2 or not OPENROUTER_API_KEY_3:
-            raise ValueError(
-                "OLLAMA_API_KEY_1, OLLAMA_API_KEY_2, and OLLAMA_API_KEY_3 "
-                "are required for async metric evaluation."
-            )
+        # if not OPENROUTER_API_KEY_1 or not OPENROUTER_API_KEY_2 or not OPENROUTER_API_KEY_3:
+        #     raise ValueError(
+        #         "OLLAMA_API_KEY_1, OLLAMA_API_KEY_2, and OLLAMA_API_KEY_3 "
+        #         "are required for async metric evaluation."
+        #     )
 
-        self.model_1 = DeepEvalOpenRouterModel(
-            model_name=eval_model_name,
-            api_key=OPENROUTER_API_KEY_1,
-        )
-        self.model_2 = DeepEvalOpenRouterModel(
-            model_name=eval_model_name,
-            api_key=OPENROUTER_API_KEY_2,
-        )
-        self.model_3 = DeepEvalOpenRouterModel(
-            model_name=eval_model_name,
-            api_key=OPENROUTER_API_KEY_3,
-        )
+        # self.model_1 = DeepEvalOpenRouterModel(
+        #     model_name=eval_model_name,
+        #     api_key=OPENROUTER_API_KEY_1,
+        # )
+        # self.model_2 = DeepEvalOpenRouterModel(
+        #     model_name=eval_model_name,
+        #     api_key=OPENROUTER_API_KEY_2,
+        # )
+        # self.model_3 = DeepEvalOpenRouterModel(
+        #     model_name=eval_model_name,
+        #     api_key=OPENROUTER_API_KEY_3,
+        # )
+
+        self.model_1 = DeepEvalOllamaLocalModel(model_name=eval_model_name)
+        self.model_2 = DeepEvalOllamaLocalModel(model_name=eval_model_name)
+        self.model_3 = DeepEvalOllamaLocalModel(model_name=eval_model_name)
 
         self.hallucination_metric = HallucinationMetric(
             threshold=0.5,
@@ -158,9 +197,7 @@ class DeepEvalEvaluator:
         Evaluate answer using all three metrics.
 
         Args:
-            question: Input question
-            answer: Model-generated answer
-            context: Ground truth answer (serves as context)
+            question: Input question, answer: Model-generated answer, context: Ground truth answer (serves as context)
 
         Returns:
             Dictionary with metric scores and pass/fail status

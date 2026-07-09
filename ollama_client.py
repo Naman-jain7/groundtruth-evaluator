@@ -15,6 +15,19 @@ class OllamaLocalClient:
         self.generate_url = f"{self.host}/api/generate"
         self.available_models = {model for model in AVAILABLE_MODELS if model}
 
+    def _schema_json(self, schema: type[Any]) -> dict[str, Any]:
+        if hasattr(schema, "model_json_schema"):
+            return schema.model_json_schema()
+        return schema.schema()
+
+    def _validate_schema_response(self, schema: type[Any], response: str) -> Any:
+        try:
+            if hasattr(schema, "model_validate_json"):
+                return schema.model_validate_json(response)
+            return schema.parse_raw(response)
+        except Exception:
+            return response
+
     def generate(
         self,
         model: str,
@@ -25,7 +38,9 @@ class OllamaLocalClient:
         ),
         max_tokens: int = 512,
         temperature: float = 0.0,
-    ) -> str:
+        schema: type[Any] | None = None,
+        think: bool = False,
+    ) -> Any:
         """Generate an answer from a local Ollama model."""
 
         if not model:
@@ -33,7 +48,7 @@ class OllamaLocalClient:
         if self.available_models and model not in self.available_models:
             raise ValueError(f"Model {model} is not listed in AVAILABLE_MODELS.")
 
-        payload = {
+        payload: dict[str, Any] = {
             "model": model,
             "prompt": prompt,
             "system": system_message,
@@ -43,6 +58,15 @@ class OllamaLocalClient:
                 "temperature": temperature,
             },
         }
+        
+        # Disable thinking for quick outputs on thinking models
+        if not think:
+            payload["options"]["num_ctx"] = 4096 # Just to be safe
+            # Ollama options doesn't officially document 'think' flag, but if supported we pass it
+            payload["options"]["think"] = False
+
+        if schema is not None:
+            payload["format"] = self._schema_json(schema)
 
         try:
             response = requests.post(
@@ -62,7 +86,11 @@ class OllamaLocalClient:
                     raise RuntimeError(data["error"])
                 chunks.append(data.get("response", ""))
 
-            return "".join(chunks).strip()
+            final_response = "".join(chunks).strip()
+            
+            if schema is not None:
+                return self._validate_schema_response(schema, final_response)
+            return final_response
         
         except requests.RequestException as e:
             raise RuntimeError(f"Local Ollama request failed for model {model}: {e}") from e
@@ -70,15 +98,39 @@ class OllamaLocalClient:
         except (json.JSONDecodeError, RuntimeError) as e:
             raise RuntimeError(f"Local Ollama generation failed for model {model}: {e}") from e
 
+    async def a_generate(
+        self,
+        model: str,
+        prompt: str,
+        system_message: str = (
+            "You are a precise and truthful assistant. Provide direct, objective, and accurate "
+            "answers in 1-2 sentences, avoiding speculation or common misconceptions."
+        ),
+        max_tokens: int = 512,
+        temperature: float = 0.0,
+        schema: type[Any] | None = None,
+        think: bool = False,
+    ) -> Any:
+        return await asyncio.to_thread(
+            self.generate,
+            model=model,
+            prompt=prompt,
+            system_message=system_message,
+            max_tokens=max_tokens,
+            temperature=temperature,
+            schema=schema,
+            think=think,
+        )
+
 
 class OpenRouterCloudClient:
     """Client for OpenRouter Cloud API using langchain-openai."""
 
-    def __init__(self, api_key: str | None = None):
+    def __init__(self, api_key: str | None = None, api_url: str | None = None):
         self.api_key = api_key or OPENROUTER_API_KEY_1
-        self.api_url = OPENROUTER_API_URL
+        self.api_url = api_url or OPENROUTER_API_URL
         if not self.api_key:
-            raise ValueError("OPENROUTER_API_KEY is required for cloud evaluation.")
+            raise ValueError("API Key is required.")
 
         self.available_models = {model for model in AVAILABLE_MODELS if model}
 
@@ -168,20 +220,21 @@ class OpenRouterCloudClient:
 
 
 class OllamaCloudClient:
-    """Client for Ollama Cloud API with error handling."""
+    """Client for Ollama Cloud API with error handling. Also works with local Ollama (no auth)."""
 
-    def __init__(self, api_key: str | None = None):  # type:ignore
+    def __init__(self, api_key: str | None = None, host: str | None = None):  # type:ignore
         self.api_key = api_key or OPENROUTER_API_KEY_1
-        self.api_url = OPENROUTER_API_URL
-        if not self.api_key:
-            raise ValueError("OLLAMA_API_KEY is required for cloud evaluation.")
-        if not self.api_url:
-            raise ValueError("OLLAMA_API_URL is required for cloud evaluation.")
+        self.api_url = host or OPENROUTER_API_URL
 
-        self.client = Client(
-            host=self.api_url,
-            headers={"Authorization": f"Bearer {self.api_key}"},
-        )
+        if not self.api_url:
+            raise ValueError("OLLAMA_API_URL is required.")
+
+        client_kwargs: dict[str, Any] = {"host": self.api_url}
+        # Only add auth header when an API key is present (not needed for local Ollama)
+        if self.api_key:
+            client_kwargs["headers"] = {"Authorization": f"Bearer {self.api_key}"}
+
+        self.client = Client(**client_kwargs)
         self.available_models = {model for model in AVAILABLE_MODELS if model}
 
     def _schema_json(self, schema: type[Any]) -> dict[str, Any]:
@@ -205,6 +258,7 @@ class OllamaCloudClient:
         max_tokens: int = 512,
         temperature: float = 0.7,
         schema: type[Any] | None = None,
+        think: bool = False,
     ) -> Any:
         """Generate an evaluation response using the Ollama Cloud API."""
 
@@ -219,10 +273,14 @@ class OllamaCloudClient:
             messages.append({"role": "system", "content": system_message})
         messages.append({"role": "user", "content": prompt})
 
-        options = {
+        options: dict[str, Any] = {
             "num_predict": max_tokens,
             "temperature": temperature,
         }
+        # Disable thinking for faster outputs on thinking models
+        if not think:
+            options["think"] = False
+
         chat_kwargs: dict[str, Any] = {
             "model": model,
             "messages": messages,
@@ -253,6 +311,7 @@ class OllamaCloudClient:
         max_tokens: int = 512,
         temperature: float = 0.7,
         schema: type[Any] | None = None,
+        think: bool = False,
     ) -> Any:
         """Async wrapper for cloud evaluation generation."""
 
@@ -264,4 +323,5 @@ class OllamaCloudClient:
             max_tokens=max_tokens,
             temperature=temperature,
             schema=schema,
+            think=think,
         )
