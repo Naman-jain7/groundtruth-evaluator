@@ -5,44 +5,88 @@ TruthfulQA Evaluation using DeepEval Metrics
 
 OVERALL STATISTICS
 --------------------------------------------------------------------------------
-Total Categories:        1
+Total Categories:        5
 Total Models Evaluated:  2
-Total Evaluations:       3
-Avg Hallucination Rate:  0.00%
-Avg Relevancy Rate:      75.00%
-Avg Faithfulness Rate:   100.00%
+Total Evaluations:       100
+Avg Hallucination Rate:  65.89%
+Avg Relevancy Rate:      83.17%
+Avg Faithfulness Rate:   85.33%
 
 PER-MODEL STATISTICS
 --------------------------------------------------------------------------------
 
 Model: gemma3:4b
-  Categories Evaluated: 1
-  Total Samples:        1
-  Avg Hallucination Rate: 0.00%
-  Avg Relevancy Rate:     50.00%
-  Avg Faithfulness Rate:  100.00%
+  Categories Evaluated: 5
+  Total Samples:        5
+  Avg Hallucination Rate: 68.11%
+  Avg Relevancy Rate:     88.56%
+  Avg Faithfulness Rate:  88.33%
 
-Model: gemma4:31b
-  Categories Evaluated: 1
-  Total Samples:        1
-  Avg Hallucination Rate: 0.00%
-  Avg Relevancy Rate:     100.00%
-  Avg Faithfulness Rate:  100.00%
+Model: llama3.2:3b
+  Categories Evaluated: 5
+  Total Samples:        5
+  Avg Hallucination Rate: 63.67%
+  Avg Relevancy Rate:     77.78%
+  Avg Faithfulness Rate:  82.33%
 
 
 PER-CATEGORY STATISTICS
 --------------------------------------------------------------------------------
 
-MISCONCEPTIONS
-  Samples: 3
+CONSPIRACIES
+  Samples: 20
     gemma3:4b:
-      Hallucination Pass Rate: 0.00%
-      Relevancy Pass Rate:     50.00%
-      Faithfulness Pass Rate:  100.00%
-    gemma4:31b:
-      Hallucination Pass Rate: 0.00%
+      Hallucination Pass Rate: 80.00%
       Relevancy Pass Rate:     100.00%
       Faithfulness Pass Rate:  100.00%
+    llama3.2:3b:
+      Hallucination Pass Rate: 80.00%
+      Relevancy Pass Rate:     60.00%
+      Faithfulness Pass Rate:  90.00%
+
+MISCONCEPTIONS
+  Samples: 40
+    gemma3:4b:
+      Hallucination Pass Rate: 65.00%
+      Relevancy Pass Rate:     95.00%
+      Faithfulness Pass Rate:  95.00%
+    llama3.2:3b:
+      Hallucination Pass Rate: 65.00%
+      Relevancy Pass Rate:     80.00%
+      Faithfulness Pass Rate:  95.00%
+
+MISQUOTATIONS
+  Samples: 20
+    gemma3:4b:
+      Hallucination Pass Rate: 40.00%
+      Relevancy Pass Rate:     70.00%
+      Faithfulness Pass Rate:  80.00%
+    llama3.2:3b:
+      Hallucination Pass Rate: 40.00%
+      Relevancy Pass Rate:     60.00%
+      Faithfulness Pass Rate:  60.00%
+
+PROVERBS
+  Samples: 2
+    gemma3:4b:
+      Hallucination Pass Rate: 100.00%
+      Relevancy Pass Rate:     100.00%
+      Faithfulness Pass Rate:  100.00%
+    llama3.2:3b:
+      Hallucination Pass Rate: 100.00%
+      Relevancy Pass Rate:     100.00%
+      Faithfulness Pass Rate:  100.00%
+
+SUPERSTITIONS
+  Samples: 18
+    gemma3:4b:
+      Hallucination Pass Rate: 55.56%
+      Relevancy Pass Rate:     77.78%
+      Faithfulness Pass Rate:  66.67%
+    llama3.2:3b:
+      Hallucination Pass Rate: 33.33%
+      Relevancy Pass Rate:     88.89%
+      Faithfulness Pass Rate:  66.67%
 
 
 ================================================================================
@@ -50,7 +94,7 @@ SUMMARY & RECOMMENDATIONS
 ================================================================================
 
 ✅ Best performing model (overall hallucination): gemma3:4b
-⚠️  Weakest category (overall hallucination): Misconceptions
+⚠️  Weakest category (overall hallucination): Misquotations
 
 Note: All metrics are pass rates (higher = better).
 Hallucination metric: % of responses that pass (no hallucinations)

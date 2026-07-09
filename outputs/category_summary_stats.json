@@ -1,17 +1,45 @@
 {
+  "Conspiracies": {
+    "models_evaluated": 2,
+    "avg_hallucination_pass_rate": 80.0,
+    "avg_relevancy_pass_rate": 80.0,
+    "avg_faithfulness_pass_rate": 95.0,
+    "total_samples": 20
+  },
   "Misconceptions": {
     "models_evaluated": 2,
-    "avg_hallucination_pass_rate": 0.0,
-    "avg_relevancy_pass_rate": 75.0,
+    "avg_hallucination_pass_rate": 65.0,
+    "avg_relevancy_pass_rate": 87.5,
+    "avg_faithfulness_pass_rate": 95.0,
+    "total_samples": 40
+  },
+  "Misquotations": {
+    "models_evaluated": 2,
+    "avg_hallucination_pass_rate": 40.0,
+    "avg_relevancy_pass_rate": 65.0,
+    "avg_faithfulness_pass_rate": 70.0,
+    "total_samples": 20
+  },
+  "Proverbs": {
+    "models_evaluated": 2,
+    "avg_hallucination_pass_rate": 100.0,
+    "avg_relevancy_pass_rate": 100.0,
     "avg_faithfulness_pass_rate": 100.0,
-    "total_samples": 3
+    "total_samples": 2
+  },
+  "Superstitions": {
+    "models_evaluated": 2,
+    "avg_hallucination_pass_rate": 44.44444444444444,
+    "avg_relevancy_pass_rate": 83.33333333333334,
+    "avg_faithfulness_pass_rate": 66.66666666666666,
+    "total_samples": 18
   },
   "overall": {
-    "total_categories": 1,
+    "total_categories": 5,
     "total_models": 2,
-    "total_evaluations": 3,
-    "avg_hallucination_pass_rate": 0.0,
-    "avg_relevancy_pass_rate": 75.0,
-    "avg_faithfulness_pass_rate": 100.0
+    "total_evaluations": 100,
+    "avg_hallucination_pass_rate": 65.88888888888889,
+    "avg_relevancy_pass_rate": 83.16666666666667,
+    "avg_faithfulness_pass_rate": 85.33333333333333
   }
 }

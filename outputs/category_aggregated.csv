@@ -1,3 +1,11 @@
 category,model,sample_count,hallucination_pass_rate,hallucination_avg_score,answer_relevancy_pass_rate,answer_relevancy_avg_score,faithfulness_pass_rate,faithfulness_avg_score
-Misconceptions,gemma3:4b,2,0.0,1.0,50.0,0.7,100.0,0.75
-Misconceptions,gemma4:31b,1,0.0,1.0,100.0,1.0,100.0,1.0
+Conspiracies,gemma3:4b,10,80.0,0.2,100.0,0.7966666666666666,100.0,0.85
+Conspiracies,llama3.2:3b,10,80.0,0.25,60.0,0.5133333333333333,90.0,0.7821428571428571
+Misconceptions,gemma3:4b,20,65.0,0.35,95.0,0.7791666666666666,95.0,0.8208333333333332
+Misconceptions,llama3.2:3b,20,65.0,0.35,80.0,0.775,95.0,0.7275
+Misquotations,gemma3:4b,10,40.0,0.6,70.0,0.575,80.0,0.675
+Misquotations,llama3.2:3b,10,40.0,0.6,60.0,0.575,60.0,0.5333333333333333
+Proverbs,gemma3:4b,1,100.0,0.0,100.0,1.0,100.0,1.0
+Proverbs,llama3.2:3b,1,100.0,0.0,100.0,1.0,100.0,1.0
+Superstitions,gemma3:4b,9,55.55555555555556,0.5,77.77777777777779,0.7,66.66666666666666,0.6481481481481481
+Superstitions,llama3.2:3b,9,33.33333333333333,0.6666666666666666,88.88888888888889,0.8537037037037037,66.66666666666666,0.6481481481481481

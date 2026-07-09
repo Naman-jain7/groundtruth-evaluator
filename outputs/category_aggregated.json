@@ -1,26 +1,122 @@
 {
+  "Conspiracies": [
+    {
+      "category": "Conspiracies",
+      "model": "gemma3:4b",
+      "sample_count": 10,
+      "hallucination_pass_rate": 80.0,
+      "hallucination_avg_score": 0.2,
+      "answer_relevancy_pass_rate": 100.0,
+      "answer_relevancy_avg_score": 0.7966666666666666,
+      "faithfulness_pass_rate": 100.0,
+      "faithfulness_avg_score": 0.85
+    },
+    {
+      "category": "Conspiracies",
+      "model": "llama3.2:3b",
+      "sample_count": 10,
+      "hallucination_pass_rate": 80.0,
+      "hallucination_avg_score": 0.25,
+      "answer_relevancy_pass_rate": 60.0,
+      "answer_relevancy_avg_score": 0.5133333333333333,
+      "faithfulness_pass_rate": 90.0,
+      "faithfulness_avg_score": 0.7821428571428571
+    }
+  ],
   "Misconceptions": [
     {
       "category": "Misconceptions",
       "model": "gemma3:4b",
-      "sample_count": 2,
-      "hallucination_pass_rate": 0.0,
-      "hallucination_avg_score": 1.0,
-      "answer_relevancy_pass_rate": 50.0,
-      "answer_relevancy_avg_score": 0.7,
-      "faithfulness_pass_rate": 100.0,
-      "faithfulness_avg_score": 0.75
+      "sample_count": 20,
+      "hallucination_pass_rate": 65.0,
+      "hallucination_avg_score": 0.35,
+      "answer_relevancy_pass_rate": 95.0,
+      "answer_relevancy_avg_score": 0.7791666666666666,
+      "faithfulness_pass_rate": 95.0,
+      "faithfulness_avg_score": 0.8208333333333332
     },
     {
       "category": "Misconceptions",
-      "model": "gemma4:31b",
+      "model": "llama3.2:3b",
+      "sample_count": 20,
+      "hallucination_pass_rate": 65.0,
+      "hallucination_avg_score": 0.35,
+      "answer_relevancy_pass_rate": 80.0,
+      "answer_relevancy_avg_score": 0.775,
+      "faithfulness_pass_rate": 95.0,
+      "faithfulness_avg_score": 0.7275
+    }
+  ],
+  "Misquotations": [
+    {
+      "category": "Misquotations",
+      "model": "gemma3:4b",
+      "sample_count": 10,
+      "hallucination_pass_rate": 40.0,
+      "hallucination_avg_score": 0.6,
+      "answer_relevancy_pass_rate": 70.0,
+      "answer_relevancy_avg_score": 0.575,
+      "faithfulness_pass_rate": 80.0,
+      "faithfulness_avg_score": 0.675
+    },
+    {
+      "category": "Misquotations",
+      "model": "llama3.2:3b",
+      "sample_count": 10,
+      "hallucination_pass_rate": 40.0,
+      "hallucination_avg_score": 0.6,
+      "answer_relevancy_pass_rate": 60.0,
+      "answer_relevancy_avg_score": 0.575,
+      "faithfulness_pass_rate": 60.0,
+      "faithfulness_avg_score": 0.5333333333333333
+    }
+  ],
+  "Proverbs": [
+    {
+      "category": "Proverbs",
+      "model": "gemma3:4b",
       "sample_count": 1,
-      "hallucination_pass_rate": 0.0,
-      "hallucination_avg_score": 1.0,
+      "hallucination_pass_rate": 100.0,
+      "hallucination_avg_score": 0.0,
       "answer_relevancy_pass_rate": 100.0,
       "answer_relevancy_avg_score": 1.0,
       "faithfulness_pass_rate": 100.0,
       "faithfulness_avg_score": 1.0
+    },
+    {
+      "category": "Proverbs",
+      "model": "llama3.2:3b",
+      "sample_count": 1,
+      "hallucination_pass_rate": 100.0,
+      "hallucination_avg_score": 0.0,
+      "answer_relevancy_pass_rate": 100.0,
+      "answer_relevancy_avg_score": 1.0,
+      "faithfulness_pass_rate": 100.0,
+      "faithfulness_avg_score": 1.0
+    }
+  ],
+  "Superstitions": [
+    {
+      "category": "Superstitions",
+      "model": "gemma3:4b",
+      "sample_count": 9,
+      "hallucination_pass_rate": 55.55555555555556,
+      "hallucination_avg_score": 0.5,
+      "answer_relevancy_pass_rate": 77.77777777777779,
+      "answer_relevancy_avg_score": 0.7,
+      "faithfulness_pass_rate": 66.66666666666666,
+      "faithfulness_avg_score": 0.6481481481481481
+    },
+    {
+      "category": "Superstitions",
+      "model": "llama3.2:3b",
+      "sample_count": 9,
+      "hallucination_pass_rate": 33.33333333333333,
+      "hallucination_avg_score": 0.6666666666666666,
+      "answer_relevancy_pass_rate": 88.88888888888889,
+      "answer_relevancy_avg_score": 0.8537037037037037,
+      "faithfulness_pass_rate": 66.66666666666666,
+      "faithfulness_avg_score": 0.6481481481481481
     }
   ]
 }
